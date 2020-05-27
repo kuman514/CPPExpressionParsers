@@ -9,8 +9,12 @@ enum TOKEN {NONE, NUM, ADD, SUB, MUL, DIV} token;
 long long getExpression(void);
 long long calculateFirstLayer(void);
 long long calculateSecondLayer(void);
+long long calculateThirdLayer(void);
 long long getFactor(void);
 void getToken(void);
+
+TOKEN priority[4] = {ADD, MUL, SUB, DIV};
+
 
 int main(void)
 {
@@ -25,18 +29,28 @@ long long getExpression(void)
 {
     long long result = calculateFirstLayer();
     
-    while(token == ADD || token == SUB)
+    while(token == priority[3])
     {
         TOKEN save = token;
         getToken();
         
-        if(save == ADD)
+        switch(save)
         {
+            case ADD:
             result += calculateFirstLayer();
-        }
-        else if(save == SUB)
-        {
+            break;
+            
+            case SUB:
             result -= calculateFirstLayer();
+            break;
+            
+            case MUL:
+            result *= calculateFirstLayer();
+            break;
+            
+            case DIV:
+            result /= calculateFirstLayer();
+            break;
         }
     }
     
@@ -46,20 +60,30 @@ long long getExpression(void)
 
 long long calculateFirstLayer(void)
 {
-    long long result = getFactor();
+    long long result = calculateSecondLayer();
     
-    while(token == MUL || token == DIV)
+    while(token == priority[2])
     {
         TOKEN save = token;
         getToken();
         
-        if(save == MUL)
+        switch(save)
         {
-            result *= getFactor();
-        }
-        else if(save == DIV)
-        {
-            result /= getFactor();
+            case ADD:
+            result += calculateSecondLayer();
+            break;
+            
+            case SUB:
+            result -= calculateSecondLayer();
+            break;
+            
+            case MUL:
+            result *= calculateSecondLayer();
+            break;
+            
+            case DIV:
+            result /= calculateSecondLayer();
+            break;
         }
     }
     
@@ -69,8 +93,67 @@ long long calculateFirstLayer(void)
 
 long long calculateSecondLayer(void)
 {
-    // empty yet
-    return 0;
+    long long result = calculateThirdLayer();
+    
+    while(token == priority[1])
+    {
+        TOKEN save = token;
+        getToken();
+        
+        switch(save)
+        {
+            case ADD:
+            result += calculateThirdLayer();
+            break;
+            
+            case SUB:
+            result -= calculateThirdLayer();
+            break;
+            
+            case MUL:
+            result *= calculateThirdLayer();
+            break;
+            
+            case DIV:
+            result /= calculateThirdLayer();
+            break;
+        }
+    }
+    
+    return result;
+}
+
+
+long long calculateThirdLayer(void)
+{
+    long long result = getFactor();
+    
+    while(token == priority[0])
+    {
+        TOKEN save = token;
+        getToken();
+        
+        switch(save)
+        {
+            case ADD:
+            result += getFactor();
+            break;
+            
+            case SUB:
+            result -= getFactor();
+            break;
+            
+            case MUL:
+            result *= getFactor();
+            break;
+            
+            case DIV:
+            result /= getFactor();
+            break;
+        }
+    }
+    
+    return result;
 }
 
 

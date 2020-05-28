@@ -3,15 +3,12 @@
 
 // implementing recursive top-down token expression parser
 
-long long value;
+int value;
 enum TOKEN {NONE, NUM, ADD, SUB, MUL, DIV} token;
 
-long long getExpression(void);
-long long calculateFirstLayer(void);
-long long calculateSecondLayer(void);
-long long calculateThirdLayer(void);
 long long getFactor(void);
 void getToken(void);
+long long getLayer(int level, TOKEN curop);
 
 TOKEN priority[4] = {ADD, MUL, SUB, DIV};
 
@@ -19,141 +16,10 @@ TOKEN priority[4] = {ADD, MUL, SUB, DIV};
 int main(void)
 {
     getToken();
-    long long result = getExpression();
+    //long long result = getExpression();
+    long long result = getLayer(0, priority[0]);
     std::cout << result << std::endl;
     return 0;
-}
-
-
-long long getExpression(void)
-{
-    long long result = calculateFirstLayer();
-    
-    while(token == priority[3])
-    {
-        TOKEN save = token;
-        getToken();
-        
-        switch(save)
-        {
-            case ADD:
-            result += calculateFirstLayer();
-            break;
-            
-            case SUB:
-            result -= calculateFirstLayer();
-            break;
-            
-            case MUL:
-            result *= calculateFirstLayer();
-            break;
-            
-            case DIV:
-            result /= calculateFirstLayer();
-            break;
-        }
-    }
-    
-    return result;
-}
-
-
-long long calculateFirstLayer(void)
-{
-    long long result = calculateSecondLayer();
-    
-    while(token == priority[2])
-    {
-        TOKEN save = token;
-        getToken();
-        
-        switch(save)
-        {
-            case ADD:
-            result += calculateSecondLayer();
-            break;
-            
-            case SUB:
-            result -= calculateSecondLayer();
-            break;
-            
-            case MUL:
-            result *= calculateSecondLayer();
-            break;
-            
-            case DIV:
-            result /= calculateSecondLayer();
-            break;
-        }
-    }
-    
-    return result;
-}
-
-
-long long calculateSecondLayer(void)
-{
-    long long result = calculateThirdLayer();
-    
-    while(token == priority[1])
-    {
-        TOKEN save = token;
-        getToken();
-        
-        switch(save)
-        {
-            case ADD:
-            result += calculateThirdLayer();
-            break;
-            
-            case SUB:
-            result -= calculateThirdLayer();
-            break;
-            
-            case MUL:
-            result *= calculateThirdLayer();
-            break;
-            
-            case DIV:
-            result /= calculateThirdLayer();
-            break;
-        }
-    }
-    
-    return result;
-}
-
-
-long long calculateThirdLayer(void)
-{
-    long long result = getFactor();
-    
-    while(token == priority[0])
-    {
-        TOKEN save = token;
-        getToken();
-        
-        switch(save)
-        {
-            case ADD:
-            result += getFactor();
-            break;
-            
-            case SUB:
-            result -= getFactor();
-            break;
-            
-            case MUL:
-            result *= getFactor();
-            break;
-            
-            case DIV:
-            result /= getFactor();
-            break;
-        }
-    }
-    
-    return result;
 }
 
 
@@ -202,5 +68,74 @@ void getToken(void)
         
         default:
         token = NONE;
+    }
+}
+
+
+long long getLayer(int level, TOKEN curop)
+{
+    if(level < 3)
+    {
+        // layer level
+        long long result = getLayer(level + 1, priority[level + 1]);
+    
+        while(token == curop)
+        {
+            TOKEN save = token;
+            getToken();
+            
+            switch(save)
+            {
+                case ADD:
+                result += getLayer(level + 1, priority[level + 1]);
+                break;
+                
+                case SUB:
+                result -= getLayer(level + 1, priority[level + 1]);
+                break;
+                
+                case MUL:
+                result *= getLayer(level + 1, priority[level + 1]);
+                break;
+                
+                case DIV:
+                result /= getLayer(level + 1, priority[level + 1]);
+                break;
+            }
+        }
+    
+        return result;
+    }
+    else
+    {
+        // factor level
+        long long result = getFactor();
+    
+        while(token == curop)
+        {
+            TOKEN save = token;
+            getToken();
+            
+            switch(save)
+            {
+                case ADD:
+                result += getFactor();
+                break;
+                
+                case SUB:
+                result -= getFactor();
+                break;
+                
+                case MUL:
+                result *= getFactor();
+                break;
+                
+                case DIV:
+                result /= getFactor();
+                break;
+            }
+        }
+    
+        return result;
     }
 }
